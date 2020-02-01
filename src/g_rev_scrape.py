@@ -5,12 +5,19 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 import selenium.common.exceptions as seleniumerrors
+
+import numpy as np
+
 import time
 import json
+
 from pymongo import MongoClient
 
+
+
+
 #hacky way to easily edit the range to operate over in nano on the ec2
-start, stop = 4667023, 4667025
+#start, stop = 4667023, 4667025
 
 
 def click_in_margin():
