@@ -24,7 +24,7 @@ def click_in_margin():
     '''gets rid of an annoying pop-up that asks you to log in whenever you load a page'''
     actions.move_by_offset(25,150).click().perform()
     actions.move_by_offset(-25,-150).perform()
-
+    
 
 def scroll_to_bottom(scroll_wait):
     '''a function which rolls through a page to force the lazy loader to load everything'''
@@ -76,10 +76,12 @@ def each_page():
     Returns:
     dicontary: book_id : list of reviews
     '''
+    docs = []
     while True:
-        docs = []
+        
         new_doc =scoop_reviews()
-        docs =[i for i in new_doc]
+        for i in new_doc:
+            docs.append(i)
         
         try:
             elm = driver.find_element_by_class_name('next_page')
@@ -92,7 +94,7 @@ def each_page():
         print('going to next page!')
         elm.click()
 
-        return {book_id : docs}
+        return docs
 
 
 def log_current_sample():
@@ -122,6 +124,7 @@ def import_samples():
     samples = np.loadtxt('samples.txt')
     return [int(items) for items in samples]
 
+
 def get_next_page(book_id):
     '''moves to the next page according to the samples
     ++++++++++
@@ -148,22 +151,31 @@ def get_last_index():
     Returns
     the index of the most recent sample pulled from goodreads
     '''
+    progress = int(np.loadtxt('progress.txt'))
+    print ('{} is in the progress log'.format(progress))
+    
+    return samples.index(progress)
 
-    return samples.index(int(np.loadtxt('progress.txt'))) 
-
-def save_to_mongo(review_dict):
-
+def save_to_mongo(review_lst):
+    '''
+    Helperfunction that takes a list of reviews, appends them to dictonaries, and feeds them into mongodb
+    
+    Attributes:
+    review_lst (list):reviews
+    '''
     #connect to the mongo thing
     client = MongoClient()
     db = client['reviews']
     gr_collection = db['book_reviews']
-    gr_collection.insert_one(review_dict)
+    print(review_lst)
+    for item in review_lst:
+        mongo_dict = {'book_id':book_id, 'reviews' : item}
+        gr_collection.insert_one(mongo_dict) 
     #add doc to mongodb
     #disconnect from mongo(do this over and over, don't keep mongo open, hopefully saves ram!?)
     client.close()
 
 if __name__ == "__main__":
-    #create an option to run the script without a window (headless mode)
     option = webdriver.FirefoxOptions()
     option.add_argument('-headless')
     print("Hello, I'm just getting everything together")
@@ -178,18 +190,19 @@ if __name__ == "__main__":
     samples = import_samples()
     current_index = get_last_index()
     print('everything seems to be in order.')
-         
-    
-    for book_id in samples[current_index:-1]:
+    print(current_index)
+
+    for book_id in samples[int(current_index):-1]:
         print("**stretches**")
-#         current_index = samples.pop()
+        current_index+=1
+    #         current_index = samples.pop()
         log_current_sample()
         get_next_page(book_id)
 
         if (str(book_id)in driver.current_url) != True:
                 print("Uhhh....I'm a little confused, but somehow I ended up at {}".format(driver.current_url))
                 continue
-#         print('loading '+book_review_url)
+    #         print('loading '+book_review_url)
 
         if first_page == True:
                 click_in_margin()
@@ -198,12 +211,12 @@ if __name__ == "__main__":
         print('scrolling down')
         #scroll_to_bottom(1.5)  # let the website load for 1.5 secs...ugh
         print('scooping reveiws')
-        review_dict = each_page()
-        save_to_mongo(review_dict)
+        review_lst = each_page()
+        save_to_mongo(review_lst)
         #add doc to mongodb
         print('book {} done, now sleeping'.format(book_id))
         time.sleep(3) #sleep of 4 felt too long. see if 3 gets you kicked. 
     #end loop
 
-    driver.close()
+driver.close()
 
