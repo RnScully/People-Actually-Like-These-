@@ -198,6 +198,7 @@ if __name__ == "__main__":
     #         current_index = samples.pop()
         log_current_sample()
         get_next_page(book_id)
+        time.sleep(2)
 
         if (str(book_id)in driver.current_url) != True:
                 print("Uhhh....I'm a little confused, but somehow I ended up at {}".format(driver.current_url))
@@ -215,7 +216,7 @@ if __name__ == "__main__":
         save_to_mongo(review_lst)
         #add doc to mongodb
         print('book {} done, now sleeping'.format(book_id))
-        time.sleep(3) #sleep of 4 felt too long. see if 3 gets you kicked. 
+        time.sleep(1) #sleep of 4 felt too long. see if 3 gets you kicked. 
     #end loop
 
 driver.close()
