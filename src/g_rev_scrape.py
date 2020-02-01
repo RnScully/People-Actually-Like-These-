@@ -106,7 +106,7 @@ def log_current_sample():
     None    
     '''
     with open('progress.txt', 'w')as f:
-        f.write(str(sample[current_index]))
+        f.write(str(samples[current_index]))
 
 def import_samples():
     '''
