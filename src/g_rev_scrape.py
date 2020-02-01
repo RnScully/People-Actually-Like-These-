@@ -174,7 +174,7 @@ if __name__ == "__main__":
 
 
     first_page = True
-    print('checking on the samples!'
+    print('checking on the samples!')
     samples = import_samples()
     current_index = get_last_index()
     print('everything seems to be in order.')
