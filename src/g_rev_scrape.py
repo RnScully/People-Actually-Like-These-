@@ -122,7 +122,7 @@ def import_samples():
     samples = np.loadtxt('samples.txt')
     return [int(items) for items in samples]
 
-def get_next_page():
+def get_next_page(book_id):
     '''moves to the next page according to the samples
     ++++++++++
     Attributes
@@ -132,11 +132,11 @@ def get_next_page():
     book_id: (int) the userid from samples
         
     '''
-    book_id = samples[current_index]
+    
     ratings_url = 'https://www.goodreads.com/review/list/{}?sort=rating&view=reviews'.format(book_id)
     print('trying to load '+ratings_url)
     driver.get(ratings_url)
-    return book_id
+    
 
 def get_last_index():
     '''
@@ -149,7 +149,7 @@ def get_last_index():
     the index of the most recent sample pulled from goodreads
     '''
 
-    return int(np.loadtxt('progress.txt')) 
+    return samples.index(int(np.loadtxt('progress.txt'))) 
 
 def save_to_mongo(review_dict):
 
@@ -179,14 +179,14 @@ if __name__ == "__main__":
     current_index = get_last_index()
     print('everything seems to be in order.')
          
-    stop_index = len(samples) - 1
-    while current_index < stop_index:
+    
+    for book_id in samples[current_index:-1]:
         print("**stretches**")
-        current_index += 1
+#         current_index = samples.pop()
         log_current_sample()
-        book_id = get_next_page()
+        get_next_page(book_id)
 
-        if (str(gr_userid)in driver.current_url) != True:
+        if (str(book_id)in driver.current_url) != True:
                 print("Uhhh....I'm a little confused, but somehow I ended up at {}".format(driver.current_url))
                 continue
         print('loading '+book_review_url)
