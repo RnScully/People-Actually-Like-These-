@@ -156,45 +156,45 @@ def save_to_mongo(review_dict):
     client.close()
 
 if __name__ == "__main__":
-#create an option to run the script without a window (headless mode)
-option = webdriver.FirefoxOptions()
-option.add_argument('-headless')
-print("Hello, I'm just getting everything together")
-driver =  webdriver.Firefox(options=option)
-actions = ActionChains(driver)
+    #create an option to run the script without a window (headless mode)
+    option = webdriver.FirefoxOptions()
+    option.add_argument('-headless')
+    print("Hello, I'm just getting everything together")
+    driver =  webdriver.Firefox(options=option)
+    actions = ActionChains(driver)
 
 
 
 
-first_page = True
-samples = import_samples()
-current_index = get_last_index()
-      
-stop_index = len(samples) - 1
-while current_index < stop_index:
-    print("**stretches**")
-    current_index += 1
-    log_current_sample()
-    book_id = get_next_page()
-    
-    if (str(gr_userid)in driver.current_url) != True:
-            print("Uhhh....I'm a little confused, but somehow I ended up at {}".format(driver.current_url))
-            continue
-        print('loading '+book_review_url)
-    
-    if first_page == True:
-            click_in_margin()
-            first_page = False
+    first_page = True
+    samples = import_samples()
+    current_index = get_last_index()
 
-    print('scrolling down')
-    #scroll_to_bottom(1.5)  # let the website load for 1.5 secs...ugh
-    print('scooping reveiws')
-    review_dict = each_page()
-    save_to_mongo(review_dict)
-    #add doc to mongodb
-    print('book {} done, now sleeping'.format(book_id))
-    time.sleep(3) #sleep of 4 felt too long. see if 3 gets you kicked. 
-#end loop
+    stop_index = len(samples) - 1
+    while current_index < stop_index:
+        print("**stretches**")
+        current_index += 1
+        log_current_sample()
+        book_id = get_next_page()
 
-driver.close()
+        if (str(gr_userid)in driver.current_url) != True:
+                print("Uhhh....I'm a little confused, but somehow I ended up at {}".format(driver.current_url))
+                continue
+            print('loading '+book_review_url)
+
+        if first_page == True:
+                click_in_margin()
+                first_page = False
+
+        print('scrolling down')
+        #scroll_to_bottom(1.5)  # let the website load for 1.5 secs...ugh
+        print('scooping reveiws')
+        review_dict = each_page()
+        save_to_mongo(review_dict)
+        #add doc to mongodb
+        print('book {} done, now sleeping'.format(book_id))
+        time.sleep(3) #sleep of 4 felt too long. see if 3 gets you kicked. 
+    #end loop
+
+    driver.close()
 
