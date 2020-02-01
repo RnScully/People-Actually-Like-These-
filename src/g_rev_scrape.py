@@ -133,7 +133,7 @@ def get_next_page(book_id):
         
     '''
     
-    ratings_url = 'https://www.goodreads.com/review/list/{}?sort=rating&view=reviews'.format(book_id)
+    ratings_url = 'https://www.goodreads.com/book/show/{}#other_reviews.format(book_id)
     print('trying to load '+ratings_url)
     driver.get(ratings_url)
     
