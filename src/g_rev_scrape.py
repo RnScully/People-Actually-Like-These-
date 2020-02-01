@@ -180,7 +180,7 @@ if __name__ == "__main__":
         if (str(gr_userid)in driver.current_url) != True:
                 print("Uhhh....I'm a little confused, but somehow I ended up at {}".format(driver.current_url))
                 continue
-            print('loading '+book_review_url)
+        print('loading '+book_review_url)
 
         if first_page == True:
                 click_in_margin()
