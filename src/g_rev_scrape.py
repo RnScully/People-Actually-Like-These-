@@ -5,6 +5,13 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 import selenium.common.exceptions as seleniumerrors
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions
+
+ignored_exceptions=(NoSuchElementException,StaleElementReferenceException,)
 
 import numpy as np
 
@@ -55,6 +62,7 @@ def scoop_reviews():
     '''
     # pull all class objects called 'bookalike review' into a list 
     try:
+        
         reviews = driver.find_elements_by_class_name("friendReviews")
     except:
         print ('that book had no reviews')
