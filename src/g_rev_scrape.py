@@ -97,9 +97,14 @@ def each_page():
         time.sleep(1)
         new_doc =scoop_reviews()
 
-        if 'disabled' in elm.get_attribute('class'):
-            print('I got to the end of these pages!')
+        try:
+            elm= driver.find_element_by_class_name('next_page')
+            if 'disabled' in elm.get_attribute('class'):
+                print('I got to the end of these pages!')
+                return docs
+        except:
             return docs
+        
         print('going to next page!')
         elm.click()
     print('got {} pages of reviews from this book!'.format(pages))
