@@ -89,8 +89,9 @@ def each_page():
     while True:
         print('letting this load')
         
-        time.sleep(1)
+        time.sleep(2)
         new_doc =scoop_reviews()
+	print(len(new_doc))
         for i in new_doc:
             print(i[:90])
             docs.append(i)
@@ -241,10 +242,12 @@ if __name__ == "__main__":
         #scroll_to_bottom(1.5)  # let the website load for 1.5 secs...ugh
         print('scooping reveiws')
         review_lst = each_page()
+	for elements in review_lst:
+        	print(str(elements)[:20])
         save_to_mongo(review_lst)
         #add doc to mongodb
         print('book {} done, now sleeping'.format(book_id))
-        #time.sleep(1) #sleep now exists in the go to the next page step. . 
+        time.sleep(1) #sleep now exists in the go to the next page step. . 
     #end loop
 
 driver.close()
