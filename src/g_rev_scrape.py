@@ -91,11 +91,12 @@ def each_page():
             elm = driver.find_element_by_class_name('next_page')
             print('getting the next ten reviews')
             pages +=1
-        except: # seleniumerrors.NoSuchElementException:
+            elm.click()
+        except seleniumerrors.NoSuchElementException:
             print("this book didn't have more than one page of reviews")
             return docs # stops looking and returns docs if this book doesn't have more pages. 
         time.sleep(1)
-        new_doc =scoop_reviews()
+        
 
         try:
             elm= driver.find_element_by_class_name('next_page')
@@ -103,10 +104,12 @@ def each_page():
                 print('I got to the end of these pages!')
                 return docs
         except:
+            print('got {} pages of reviews from this book!'.format(pages))
+
             return docs
         
         print('going to next page!')
-        elm.click()
+        
     print('got {} pages of reviews from this book!'.format(pages))
     return docs
 
@@ -184,7 +187,7 @@ def save_to_mongo(review_lst):
     
     for item in review_lst:
         print(item[:20])
-        mongo_dict = {'book_id':book_id, 'reviews' : item}
+        mongo_dict = {'book_id':str(book_id), 'reviews' : item}
         gr_collection.insert_one(mongo_dict) 
     #add doc to mongodb
     #disconnect from mongo(do this over and over, don't keep mongo open, hopefully saves ram!?)
