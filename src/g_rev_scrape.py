@@ -61,7 +61,7 @@ def scoop_reviews():
         pass
     #turn the bookalikes into json lists
     for elements in reviews:
-        print(elements) #hash this out, testing
+        print(str(elements)[:20]) #hash this out, testing
     jsons = [items.get_attribute('outerHTML') for items in reviews]
         
     return jsons
@@ -77,24 +77,33 @@ def each_page():
     dicontary: book_id : list of reviews
     '''
     docs = []
+    pages = 0
     while True:
-        time.sleep(3)
+        print('letting this load')
+        
+        time.sleep(1)
         new_doc =scoop_reviews()
         for i in new_doc:
+            print(i[:90])
             docs.append(i)
         
         try:
             elm = driver.find_element_by_class_name('next_page')
-        except seleniumerrors.NoSuchElementException:
+            print('getting the next ten reviews')
+            pages +=1
+        except: # seleniumerrors.NoSuchElementException:
+            print("this book didn't have more than one page of reviews")
             return docs # stops looking and returns docs if this book doesn't have more pages. 
-            
+        time.sleep(1)
+        new_doc =scoop_reviews()
+
         if 'disabled' in elm.get_attribute('class'):
             print('I got to the end of these pages!')
-            break
+            return docs
         print('going to next page!')
         elm.click()
-
-        return docs
+    print('got {} pages of reviews from this book!'.format(pages))
+    return docs
 
 
 def log_current_sample():
@@ -136,7 +145,7 @@ def get_next_page(book_id):
         
     '''
     
-    ratings_url = 'https://www.goodreads.com/book/show/{}#other_reviews'.format(book_id)
+    ratings_url = 'https://www.goodreads.com/book/show/{}'.format(book_id)
     print('trying to load '+ratings_url)
     driver.get(ratings_url)
     
@@ -167,8 +176,9 @@ def save_to_mongo(review_lst):
     client = MongoClient()
     db = client['reviews']
     gr_collection = db['book_reviews']
-    print(review_lst)
+    
     for item in review_lst:
+        print(item[:20])
         mongo_dict = {'book_id':book_id, 'reviews' : item}
         gr_collection.insert_one(mongo_dict) 
     #add doc to mongodb
@@ -187,7 +197,7 @@ if __name__ == "__main__":
 
     first_page = True
     print('checking on the samples!')
-    samples = import_samples()
+    samples = list(np.arange(1,70000000)) # the bookreads books are...bad. 
     current_index = get_last_index()
     print('everything seems to be in order.')
     print(current_index)
@@ -198,9 +208,11 @@ if __name__ == "__main__":
     #         current_index = samples.pop()
         log_current_sample()
         get_next_page(book_id)
-        
+        time.sleep(1)
 
         if (str(book_id)in driver.current_url) != True:
+                
+                print(book_id)
                 print("Uhhh....I'm a little confused, but somehow I ended up at {}".format(driver.current_url))
                 continue
     #         print('loading '+book_review_url)
@@ -209,7 +221,7 @@ if __name__ == "__main__":
                 click_in_margin()
                 first_page = False
 
-        print('scrolling down')
+        #print('scrolling down')
         #scroll_to_bottom(1.5)  # let the website load for 1.5 secs...ugh
         print('scooping reveiws')
         review_lst = each_page()
