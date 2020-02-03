@@ -48,7 +48,6 @@ def scroll_to_bottom(scroll_wait):
         time.sleep(scroll_wait) #wait for page to load
         
         last_height = new_height
-        
 
 def scoop_reviews():
     '''
@@ -64,25 +63,22 @@ def scoop_reviews():
     # pull all class objects called 'bookalike review' into a list 
     try:
         
-        web_elem = driver.find_elements_by_class_name("friendReviews")
+        reviews = driver.find_elements_by_class_name("friendReviews")
         
     except:
-        print ('that page had no reviews')
+        print ('that book had no reviews')
         pass
-    
-    try:
-        reviews = [i.get_attribute('outerHTML') for i in web_elem]
-    except:
-        reviews = []
+    #turn the bookalikes into json lists
+    print(str(len(reviews))+' got that many reviews')
+    for elements in reviews:
+        print(str(elements)[:20]) #hash this out, testing
+    jsons = [items.get_attribute('outerHTML') for items in reviews]
         
-    return reviews
-    
-    
-    
+    return jsons
+
 def each_page():
     '''
     helper function that will go to the next page in the reviews page.
-    Full of layered error traps trying to discover stale elements to trigger re-loads of elements. I'm sorry. 
     
     Attributes:
     None
@@ -95,38 +91,22 @@ def each_page():
     while True:
         print('letting this load')
         
-        
-        scroll_to_bottom(1.5)  # let the website load for 1.5 secs...ugh
+        time.sleep(2)
         new_doc =scoop_reviews()
-        
-
         for i in new_doc:
+            print(i[:90])
             docs.append(i)
-        #print(len(docs))    
         
         try:
             elm = driver.find_element_by_class_name('next_page')
-            
-        except seleniumerrors.NoSuchElementException:
+            print('getting the next ten reviews')
+            pages +=1
+            elm.click()
+        except seleniumerrors.NoSuchElementException | seleniumerrors.ElementClickInterceptedException:
             print("this book didn't have more than one page of reviews")
             return docs # stops looking and returns docs if this book doesn't have more pages. 
-        
-        print('getting going to the next page of book '+str(book_id))
-        pages +=1
         time.sleep(1)
         
-        
-        try:
-            elm.click()
-        except seleniumerrors.ElementClickInterceptedException:
-            print('button was obscured')
-            return docs
-        except seleniumerrors.StaleElementReferenceException:
-            try:
-                elm = driver.find_element_by_class_name('next_page')
-            except seleniumerrors.NoSuchElementException:
-                print("this book didn't have more than one page of reviews")
-                return docs # stops looking and returns docs if this book doesn't have more pages. 
 
         try:
             elm= driver.find_element_by_class_name('next_page')
@@ -139,11 +119,9 @@ def each_page():
             return docs
         
         print('going to next page!')
-    
+        
     print('got {} pages of reviews from this book!'.format(pages))
     return docs
-
-
 
 
 def log_current_sample():
@@ -158,8 +136,6 @@ def log_current_sample():
     '''
     with open('progress.txt', 'w')as f:
         f.write(str(samples[current_index]))
-        
-        
 
 def import_samples():
     '''
@@ -174,8 +150,6 @@ def import_samples():
 
     samples = np.loadtxt('samples.txt')
     return [int(items) for items in samples]
-
-
 
 
 def get_next_page(book_id):
@@ -193,8 +167,6 @@ def get_next_page(book_id):
     print('trying to load '+ratings_url)
     driver.get(ratings_url)
     
-    
-    
 
 def get_last_index():
     '''
@@ -211,8 +183,6 @@ def get_last_index():
     
     return samples.index(progress)
 
-
-
 def save_to_mongo(review_lst):
     '''
     Helperfunction that takes a list of reviews, appends them to dictonaries, and feeds them into mongodb
@@ -226,26 +196,13 @@ def save_to_mongo(review_lst):
     gr_collection = db['book_reviews']
     
     for item in review_lst:
-        
-        if len(item) < 10:
-            print('no reviews here: \n ' +str(item) )
-            continue
-        print('saving this to mongo' + str(item)[1592:1650])
+        print(item[:20])
         mongo_dict = {'book_id':str(book_id), 'reviews' : item}
         gr_collection.insert_one(mongo_dict) 
-        
-                    
     #add doc to mongodb
     #disconnect from mongo(do this over and over, don't keep mongo open, hopefully saves ram!?)
     client.close()
 
-    
-    
-    
-    ###############
-    '''MAIN BLOCK'''
-    ################
-    
 if __name__ == "__main__":
     option = webdriver.FirefoxOptions()
     option.add_argument('-headless')
@@ -282,15 +239,14 @@ if __name__ == "__main__":
                 click_in_margin()
                 first_page = False
 
-        print('scrolling down')
-        
+        #print('scrolling down')
+        #scroll_to_bottom(1.5)  # let the website load for 1.5 secs...ugh
         print('scooping reveiws')
         review_lst = each_page()
-        
         save_to_mongo(review_lst)
         #add doc to mongodb
         print('book {} done, now sleeping'.format(book_id))
-        time.sleep(1) #sleep now exists in the go to the next page step. . 
+        #time.sleep(1) #sleep now exists in the go to the next page step. . 
     #end loop
 
 driver.close()
