@@ -102,7 +102,7 @@ def each_page():
             print('getting the next ten reviews')
             pages +=1
             elm.click()
-        except seleniumerrors.NoSuchElementException | seleniumerrors.ElementClickInterceptedException:
+        except (seleniumerrors.NoSuchElementException, seleniumerrors.ElementClickInterceptedException):
             print("this book didn't have more than one page of reviews")
             return docs # stops looking and returns docs if this book doesn't have more pages. 
         time.sleep(1)
