@@ -24,6 +24,14 @@ def remove_text_inside_brackets(text, brackets="<>"):
     return ''.join(saved_chars)
 
 
+def get_lang(words):
+    if len(words)<4:
+        lang = -1
+    else:
+        lang = doc._.language['language']
+    
+    return lang
+
 def get_text(readable):
     try:
         l = readable[0].contents # turns out there's only one readable in each review. Pretty good so far. 
@@ -88,10 +96,13 @@ def save_to_mongo(add_this, db, collection):
 
     if __name__ == "__main__":
     
+    nlp = spacy.load("en")#get information and make pipe for the language detection
+    nlp.add_pipe(LanguageDetector(), name="language_detector", last=True)
+
     client = MongoClient('localhost', 27017)
-    db=client['reviews']
+    db=client['reviews'] ## Get all the mongo stuff up and running
     coll=db['book_reviews']
-    documents = [x for x in db['book_reviews'].find()]
+    documents = [x for x in db['book_reviews'].find()] #pull all our documents into a list. This is hard
     
     ##for loop going throuhg all documents
     all_revs = []
@@ -105,6 +116,8 @@ def save_to_mongo(add_this, db, collection):
         nlp_words = get_text(readable)
         if nlp_words == -1:
             continue
+
+        language = get_lang(nlp_words)
             
         
 
@@ -122,7 +135,7 @@ def save_to_mongo(add_this, db, collection):
             
         user = soup.find_all(class_ = re.compile('user'))[0].attrs['href'][11:]
         
-        sub_rev = [rate, user, title, nlp_words]
+        sub_rev = [rate, user, title, nlp_words, language]
         all_revs.append(sub_rev) 
         #progress_bar = documents.index(i)
         #update_progress(documents.index(i) / len(documents))
@@ -133,12 +146,14 @@ def save_to_mongo(add_this, db, collection):
     np.save("data/cleaned", all_revs) ## might need to do a mongo thing
     
     # # mongo thing GOES INSIDE THE LOOP
+                  #  # This is the dictonary for well shaped mongo schema
 #         formatted_dct = {'book_id' : i['book_id']
 #                          'nlp_words' : get_text(readable),
 #                          'rating_given' : rate,
 #                          'title' : title, ##title is likely to produce borked results. this one is just an isbn. soo..yeah
 #                          'user': soup.find_all(class_ = re.compile('user'))[0].attrs['href'][11:]
-#                         }
+#                          'language' : language
+#                           }
 
 
 
