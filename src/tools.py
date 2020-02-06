@@ -3,6 +3,11 @@ import time, sys
 from IPython.display import clear_output
 import pickle
 
+import nltk
+from nltk import ngrams
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+
 def update_progress(progress):
     bar_length = 40
     if isinstance(progress, int):
@@ -29,7 +34,21 @@ def extract_ngrams(data, num):
     n_grams = ngrams(nltk.word_tokenize(data), num)
     return [ ' '.join(grams) for grams in n_grams]
 
+
+
+
 def vectorizable_ngrams(original_words_list):
+    stop_words = set(stopwords.words('english'))
+
+    my_words = set([',', # punctuation
+                    '.',
+                    '"',
+                    "'",
+                    'I',# capital versions of the stop words becasue...ugh. 
+                    
+                ])
+    my_stop_words = stop_words.union(my_words)
+
     periods = [i.replace('.','. ') for i in original_words_list]
     data =[]
     for rows in periods:
@@ -39,30 +58,45 @@ def vectorizable_ngrams(original_words_list):
     dashngrams = [[grams.replace(' ','-') for grams in ngrams] for ngrams in ngram_lst]
     return dashngrams
 
-def predict_one(string, model_name, vectorizor_name):
-    
+def predict_one(review):
+    '''
+    Parameters
+    review (str): a text review
+    '''
     path = 'models/'
-        
-    tfid = pickle.load(open(path+vectorizor_name, 'rb'))
-    tfidfed = tfid.transform([string])
-
-    model = pickle.load(open(path+model_name, 'rb'))
+    
+    tfid = pickle.load(open(path+'tf84.sav', 'rb'))
+    model = pickle.load(open(path+'ngramRF85.sav', 'rb'))
+    
+    ngrams = vectorizable_ngrams([review]) #string must becalled as a list to handle single strin
+    
+    tfstring = ' '.join(ngrams[0])
+    
+    print(tfstring) ##what it sees, hash it out for final. 
+    tfidfed = tfid.transform([tfstring])
+    
     return model.predict(tfidfed)
 
-def predict_many(review_list, model_name, vectorizor_name):
+def predict_many(review_list):
     path = 'models/'
-        
-    tfid = pickle.load(open(path+vectorizor_name, 'rb'))
-    tfidfed = tfid.transform(review_list)
 
-    model = pickle.load(open(path+model_name, 'rb'))
+    tfid = pickle.load(open(path+'tf84.sav', 'rb'))
+    model = pickle.load(open(path+'ngramRF85.sav', 'rb'))
+
+    ngrams = vectorizable_ngrams(reviews) #string must becalled as a list to handle single strin
+    tfstring = [' '.join(items) for items in ngrams]
+
+    #print(tfstring) ##what it sees, hash it out for final. 
+
+    tfidfed = tfid.transform(tfstring)
+
     return model.predict(tfidfed)
 
 
 # from sklearn.metrics import confusion_matrix
 #
 
-def report_score(model, X_test, y_test):
+def report_score(model, X_train, X_test, y_train, y_test):
     '''
     a function that reports the accuracy of the model.
     Attributes:
