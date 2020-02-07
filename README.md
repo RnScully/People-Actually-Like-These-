@@ -1,15 +1,15 @@
 # Predictotron
 
-### Namechange pending. 
 This is a product review project focusing on book reviews from goodreads. It includes a script for scraping the goodreads website, and another for cleaning the data from json files into cleanly schemaed data.
 
-I hope to provide a model which predicts what average star rating a reveiw is likely to peg a book at, tell you how skewed from a "uniform" rating that would be. 
+The model is a random forest trained on book review data to predict numerical rating good/bad (good being 4 and 5, bad being 3 and below), a statistc based on the distribution of ratings in my corpus, shown below. 
 
 ### Insights and Stats
-40627 reviews pulled in initial run, 
+40627 reviews 
 97.6% englihs, 2.4% non-english. 
 
-##Process
+
+## Process
 Scraped data from Goodreads, pulled data from Amazon's review's S3
 Removed all non-english reviews. 
 
@@ -17,12 +17,15 @@ removed all negation terms from stopwords to give the n-grams the ability to enc
 
 Tokenized all reveiws as 2-grams to capture word order and negation terms. 
 
-Fit random forest to the data
+vectorized tokens using TFiDF to produce numeric arrays that the forest could use, selected 5000 features as near-optimal. 
+
+Fit random forest to the data, tune, iternate. 
 
 ### Tech Stack
 - python, numpy, re,
 - Selenium, BeautifulSoup
-- nltk, spacy_langdetect, 
+- nltk, spacy_langdetect
+- SKlearn TFIDFVectorizor, RandomForestClassifier
 
 
 ### Further Work:
