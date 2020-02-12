@@ -1,4 +1,4 @@
-# Predictotron
+# People Actually Like These!
 
 This is a product review project focusing on book reviews from goodreads. It includes a script for scraping the goodreads website, and another for cleaning the data from json files into cleanly schemaed data.
 
