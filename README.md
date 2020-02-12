@@ -5,11 +5,11 @@ This is a product review project focusing on book reviews from goodreads. It inc
 The model is a random forest trained on book review data to predict numerical rating good/bad (good being 4 and 5, bad being 3 and below), a statistc based on the distribution of ratings in my corpus, shown below. 
 
 <img src="img/ratings_hist.png">
-With 39644 reviews in my corpups, 
+With 39644 reviews in my corpus
 
 ### Insights and Stats
 40627 reviews 
-97.6% englihs, 2.4% non-english. 
+97.6% english, 2.4% non-english. 
 
 
 ## Process
